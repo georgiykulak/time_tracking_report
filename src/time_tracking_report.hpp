@@ -15,7 +15,7 @@ namespace tracking
 
         TimeTrackingReport() = delete;
 
-        TimeTrackingReport( std::string iPath, std::string oPath = "" );
+        TimeTrackingReport( std::string const & iPath, std::string const & oPath = "" );
         
         TimeTrackingReport( TimeTrackingReport const & ttr );
 
@@ -32,11 +32,13 @@ namespace tracking
         struct BasicReportRow;
 
     private:
+        std::string m_reportsCsvName;
+        std::string m_summaryCsvName;
         std::ifstream m_reportsCsv;
         std::ofstream m_summaryCsv;
         std::vector< BasicReportRow > m_reports;
-        std::size_t m_reportsSize;
-        std::size_t m_summarySize;
+        std::size_t m_reportsSize = 0;
+        std::size_t m_summarySize = 0;
     };
 
     struct DateStamp
