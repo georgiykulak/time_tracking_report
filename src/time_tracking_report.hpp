@@ -11,6 +11,8 @@ namespace tracking
     class TimeTrackingReport
     {
     public:
+        struct BasicReportRow;
+
         ~TimeTrackingReport();
 
         TimeTrackingReport() = delete;
@@ -29,7 +31,7 @@ namespace tracking
 
         std::size_t writeToOutputFile();
 
-        struct BasicReportRow;
+        virtual void parseRow( BasicReportRow & ds, std::string & str );
 
     private:
         std::string m_reportsCsvName;
@@ -43,9 +45,16 @@ namespace tracking
 
     struct DateStamp
     {
-        std::size_t m_year;
+        unsigned m_year;
         unsigned m_month;
         unsigned m_day;
+
+        std::string toString() const
+        {
+            return std::to_string(m_year) + "-"
+                 + std::to_string(m_month) + "-"
+                 + std::to_string(m_day);
+        }
     };
 
     struct TimeTrackingReport::BasicReportRow
@@ -57,7 +66,7 @@ namespace tracking
         std::string m_project;
         std::string m_task;
         DateStamp m_date;
-        double m_hours;
+        long long m_hours;
     };
 
 } // namespace tracking
