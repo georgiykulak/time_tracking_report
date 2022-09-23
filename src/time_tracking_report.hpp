@@ -47,7 +47,7 @@ namespace tracking
         std::vector< BasicReportRow > m_reports;
         std::size_t m_reportsSize = 0;
         std::size_t m_summarySize = 0;
-        const char m_denominator;
+        char m_denominator;
 
         void _writeMapToFile(
             std::map< std::string, std::multimap< DateStamp, long long > > const & peopleMonthsMap

@@ -105,7 +105,6 @@ namespace tracking
             return 0;
 
         m_summarySize = 0;
-        std::string denominator = ";";
         std::map< std::string, std::multimap< DateStamp, long long > > peopleMonthsMap;
 
         for ( auto const & report : m_reports )
@@ -138,24 +137,23 @@ namespace tracking
     void TimeTrackingReport::parseRow( BasicReportRow & ds, std::string & str )
     {
         std::string tmpPart;
-        constexpr char const denominator = ';';
         std::stringstream sstr(str);
         
-        std::getline(sstr, ds.m_name, denominator);
-        std::getline(sstr, ds.m_email, denominator);
-        std::getline(sstr, ds.m_department, denominator);
-        std::getline(sstr, ds.m_position, denominator);
-        std::getline(sstr, ds.m_project, denominator);
-        std::getline(sstr, ds.m_task, denominator);
+        std::getline(sstr, ds.m_name, m_denominator);
+        std::getline(sstr, ds.m_email, m_denominator);
+        std::getline(sstr, ds.m_department, m_denominator);
+        std::getline(sstr, ds.m_position, m_denominator);
+        std::getline(sstr, ds.m_project, m_denominator);
+        std::getline(sstr, ds.m_task, m_denominator);
 
-        std::getline(sstr, tmpPart, denominator);
+        std::getline(sstr, tmpPart, m_denominator);
         std::tm tm = {};
         strptime(tmpPart.c_str(), "%Y-%m-%d", &tm);
         ds.m_date.m_year = tm.tm_year + 1900;
         ds.m_date.m_month = tm.tm_mon + 1;
         ds.m_date.m_day = tm.tm_mday;
 
-        std::getline(sstr, tmpPart, denominator);
+        std::getline(sstr, tmpPart, m_denominator);
         ds.m_hours = std::stoll(tmpPart);
 
         ++m_reportsSize;
