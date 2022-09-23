@@ -1,8 +1,8 @@
 #ifndef TIME_TRACKING_REPORT
 #define TIME_TRACKING_REPORT
 
-#include <fstream>
-#include <string>
+#include "logger.hpp"
+
 #include <vector>
 #include <map>
 
@@ -39,6 +39,8 @@ namespace tracking
 
         virtual void parseRow( BasicReportRow & ds, std::string & str );
 
+        void resetLogger( std::string const & logFileName ) { m_logger.reset( logFileName ); }
+
     private:
         std::string m_reportsCsvName;
         std::string m_summaryCsvName;
@@ -47,6 +49,7 @@ namespace tracking
         std::vector< BasicReportRow > m_reports;
         std::size_t m_reportsSize = 0;
         std::size_t m_summarySize = 0;
+        Logger m_logger;
         char m_denominator;
 
         void _writeMapToFile(

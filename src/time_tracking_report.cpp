@@ -72,15 +72,15 @@ namespace tracking
 
         while ( std::getline( m_reportsCsv, tmpString ) )
         {
-            std::cout << "Raw line " << m_reportsSize << ": " << tmpString << "\n";
+            m_logger.log( "Raw line " + std::to_string( m_reportsSize ) + ": " + tmpString );
             parseRow( tmpRow, tmpString );
             m_reports.push_back( std::move( tmpRow ) );
         }
 
         std::chrono::steady_clock::time_point end = std::chrono::steady_clock::now();
-        std::cout << "Time difference = "
-        << std::chrono::duration_cast< std::chrono::nanoseconds > (end - begin).count()
-        << "[ns]" << std::endl;
+        m_logger.log( "Time difference = "
+        + std::to_string( std::chrono::duration_cast< std::chrono::nanoseconds >( end - begin ).count() )
+        + "[ns]" );
         
         return m_reportsSize;
     }
@@ -129,12 +129,13 @@ namespace tracking
                 peopleMonthsMap[ name ].insert({ report.m_date, report.m_hours });
             }
 
-            std::cout << "peopleMap => {report.m_name:" << report.m_name
-                << ", {report.m_date:" << report.m_date.toString()
-                << ", report.m_hours:" << report.m_hours << "}}\n";
+            m_logger.log( "peopleMap => {report.m_name:" + report.m_name
+                + ", {report.m_date:" + report.m_date.toString()
+                + ", report.m_hours:" + std::to_string( report.m_hours ) + "}}" );
         }
 
-        std::cout << "peopleMonthsMap.size() = " << peopleMonthsMap.size() << std::endl;
+        m_logger.log( "peopleMonthsMap.size() = "
+            + std::to_string( peopleMonthsMap.size() ) );
 
         _writeMapToFile( peopleMonthsMap );
 
@@ -165,15 +166,15 @@ namespace tracking
 
         ++m_reportsSize;
 
-        std::cout << "Parsed line:\n";
-        std::cout << ds.m_name
-                << "|" << ds.m_email
-                << "|" << ds.m_department
-                << "|" << ds.m_position
-                << "|" << ds.m_project
-                << "|" << ds.m_task
-                << "|" << ds.m_date.toString()
-                << "|" << std::to_string(ds.m_hours) << "\n";
+        m_logger.log( "Parsed line:" );
+        m_logger.log( ds.m_name
+                + "|" + ds.m_email
+                + "|" + ds.m_department
+                + "|" + ds.m_position
+                + "|" + ds.m_project
+                + "|" + ds.m_task
+                + "|" + ds.m_date.toString()
+                + "|" + std::to_string(ds.m_hours) );
     }
 
     void TimeTrackingReport::_writeMapToFile(
