@@ -4,9 +4,11 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace tracking
 {
+    struct DateStamp;
 
     class TimeTrackingReport
     {
@@ -17,7 +19,11 @@ namespace tracking
 
         TimeTrackingReport() = delete;
 
-        TimeTrackingReport( std::string const & iPath, std::string const & oPath = "" );
+        TimeTrackingReport(
+            std::string const & iPath,
+            std::string const & oPath = "",
+            char denominator = ';'
+        );
         
         TimeTrackingReport( TimeTrackingReport const & ttr );
 
@@ -41,6 +47,11 @@ namespace tracking
         std::vector< BasicReportRow > m_reports;
         std::size_t m_reportsSize = 0;
         std::size_t m_summarySize = 0;
+        const char m_denominator;
+
+        void _writeMapToFile(
+            std::map< std::string, std::multimap< DateStamp, long long > > const & peopleMonthsMap
+        );
     };
 
     struct DateStamp
@@ -68,6 +79,8 @@ namespace tracking
         DateStamp m_date;
         long long m_hours;
     };
+
+    bool operator<( DateStamp const & lds, DateStamp const & rds );
 
 } // namespace tracking
 

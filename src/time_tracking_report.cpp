@@ -3,8 +3,6 @@
 #include <sstream>
 #include <ctime>
 #include <chrono>
-#include <map>
-
 #include <iostream>
 
 namespace tracking
@@ -16,9 +14,14 @@ namespace tracking
         m_summaryCsv.close();
     }
 
-    TimeTrackingReport::TimeTrackingReport( std::string const & iPath, std::string const & oPath )
+    TimeTrackingReport::TimeTrackingReport(
+        std::string const & iPath,
+        std::string const & oPath,
+        char denominator
+    )
         : m_reportsCsvName{ iPath }
         , m_summaryCsvName{ oPath.empty() ? "output.csv" : oPath }
+        , m_denominator{ denominator }
     {
         m_reportsCsv.open( m_reportsCsvName );
         
@@ -29,6 +32,7 @@ namespace tracking
     }
 
     TimeTrackingReport::TimeTrackingReport( TimeTrackingReport const & ttr )
+        : m_denominator{ ttr.m_denominator }
     {
         TimeTrackingReport(ttr.m_reportsCsvName, ttr.m_summaryCsvName);
 
@@ -50,8 +54,6 @@ namespace tracking
 
     TimeTrackingReport::operator bool() const noexcept
     {
-        std::cout << "m_reportsCsv is open = " << !!m_reportsCsv << ", ";
-        std::cout << "m_summaryCsv is open = " << !!m_summaryCsv << "\n";
         return m_reportsCsv && m_summaryCsv;
     }
 
@@ -121,45 +123,14 @@ namespace tracking
                 peopleMonthsMap[ name ].insert({ report.m_date, report.m_hours });
             }
 
-            std::cout << "peopleMap => {report.m_name:" << report.m_name << ", {report.m_date:" << report.m_date.toString() << ", report.m_hours:" << report.m_hours << "}}\n";
+            std::cout << "peopleMap => {report.m_name:" << report.m_name
+                << ", {report.m_date:" << report.m_date.toString()
+                << ", report.m_hours:" << report.m_hours << "}}\n";
         }
 
         std::cout << "peopleMonthsMap.size() = " << peopleMonthsMap.size() << std::endl;
 
-        std::map< std::string, std::map< DateStamp, long long > > outputMap;
-
-        for ( auto const & person : peopleMonthsMap )
-        {
-            std::map< DateStamp, long long > tmpMap;
-
-            for ( auto const & monthHours : person.second )
-            {
-                auto hoursSet = person.second.equal_range( monthHours.first );
-                long long hoursSum = 0;
-
-                for ( auto it = hoursSet.first; it != hoursSet.second; ++it )
-                    hoursSum += it->second;
-
-                tmpMap.insert({ monthHours.first, hoursSum });
-            }
-
-            outputMap.insert({ person.first, tmpMap });
-        }
-
-        for ( auto const & report : outputMap )
-        {
-            for ( auto const & date : report.second )
-            {
-                m_summaryCsv << report.first;
-                m_summaryCsv << denominator;
-                m_summaryCsv << date.first.toString();
-                m_summaryCsv << denominator;
-                m_summaryCsv << date.second;
-                m_summaryCsv << "\n";
-                
-                ++m_summarySize;
-            }
-        }
+        _writeMapToFile( peopleMonthsMap );
 
         return m_summarySize;
     }
@@ -198,6 +169,46 @@ namespace tracking
                 << "|" << ds.m_task
                 << "|" << ds.m_date.toString()
                 << "|" << std::to_string(ds.m_hours) << "\n";
+    }
+
+    void TimeTrackingReport::_writeMapToFile(
+        std::map< std::string, std::multimap< DateStamp, long long > > const & peopleMonthsMap
+    )
+    {
+        std::map< std::string, std::map< DateStamp, long long > > outputMap;
+
+        for ( auto const & person : peopleMonthsMap )
+        {
+            std::map< DateStamp, long long > tmpMap;
+
+            for ( auto const & monthHours : person.second )
+            {
+                auto hoursSet = person.second.equal_range( monthHours.first );
+                long long hoursSum = 0;
+
+                for ( auto it = hoursSet.first; it != hoursSet.second; ++it )
+                    hoursSum += it->second;
+
+                tmpMap.insert({ monthHours.first, hoursSum });
+            }
+
+            outputMap.insert({ person.first, tmpMap });
+        }
+
+        for ( auto const & report : outputMap )
+        {
+            for ( auto const & date : report.second )
+            {
+                m_summaryCsv << report.first;
+                m_summaryCsv << m_denominator;
+                m_summaryCsv << date.first.toString();
+                m_summaryCsv << m_denominator;
+                m_summaryCsv << date.second;
+                m_summaryCsv << "\n";
+                
+                ++m_summarySize;
+            }
+        }
     }
 
 } // namespace tracking
