@@ -30,6 +30,7 @@
 *.exe
 *.out
 *.app
+build
 
 # Unit testing
 output.csv
