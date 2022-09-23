@@ -4,18 +4,26 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <map>
 
 namespace tracking
 {
+    struct DateStamp;
 
     class TimeTrackingReport
     {
     public:
+        struct BasicReportRow;
+
         ~TimeTrackingReport();
 
         TimeTrackingReport() = delete;
 
-        TimeTrackingReport( std::string iPath, std::string oPath = "" );
+        TimeTrackingReport(
+            std::string const & iPath,
+            std::string const & oPath = "",
+            char denominator = ';'
+        );
         
         TimeTrackingReport( TimeTrackingReport const & ttr );
 
@@ -29,21 +37,35 @@ namespace tracking
 
         std::size_t writeToOutputFile();
 
-        struct BasicReportRow;
+        virtual void parseRow( BasicReportRow & ds, std::string & str );
 
     private:
+        std::string m_reportsCsvName;
+        std::string m_summaryCsvName;
         std::ifstream m_reportsCsv;
         std::ofstream m_summaryCsv;
         std::vector< BasicReportRow > m_reports;
-        std::size_t m_reportsSize;
-        std::size_t m_summarySize;
+        std::size_t m_reportsSize = 0;
+        std::size_t m_summarySize = 0;
+        char m_denominator;
+
+        void _writeMapToFile(
+            std::map< std::string, std::multimap< DateStamp, long long > > const & peopleMonthsMap
+        );
     };
 
     struct DateStamp
     {
-        std::size_t m_year;
+        unsigned m_year;
         unsigned m_month;
         unsigned m_day;
+
+        std::string toString() const
+        {
+            return std::to_string(m_year) + "-"
+                 + std::to_string(m_month) + "-"
+                 + std::to_string(m_day);
+        }
     };
 
     struct TimeTrackingReport::BasicReportRow
@@ -55,8 +77,10 @@ namespace tracking
         std::string m_project;
         std::string m_task;
         DateStamp m_date;
-        double m_hours;
+        long long m_hours;
     };
+
+    bool operator<( DateStamp const & lds, DateStamp const & rds );
 
 } // namespace tracking
 
